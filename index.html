@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173b63">
+<title>Reportes diarios · Lote 03</title>
+<style>
+:root{--navy:#173b63;--blue:#2563eb;--bg:#f3f6fa;--line:#d8e0ea;--text:#172333;--muted:#627084;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
+header{background:var(--navy);color:white;padding:22px 16px}header .wrap,main{max-width:1000px;margin:auto}h1{font-size:clamp(1.35rem,3vw,2rem);margin:0 0 5px}header p{margin:0;color:#dbeafe}
+main{padding:18px 14px 40px}.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 8px #10243b0a}
+h2{font-size:1.1rem;margin:0 0 14px;color:var(--navy)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.field{min-width:0}.field.full{grid-column:1/-1}label{display:block;font-weight:700;font-size:.9rem;margin:0 0 6px}
+input,select,textarea{font:inherit;width:100%;padding:10px 11px;border:1px solid #bac7d6;border-radius:8px;background:white;color:var(--text)}textarea{min-height:76px;resize:vertical}input:focus,select:focus,textarea:focus{outline:2px solid #93c5fd;border-color:var(--blue)}
+.readonly{background:#f7f9fc;color:#42536a}.hint{font-size:.82rem;color:var(--muted);margin:5px 0 0}.repeat-list{display:grid;gap:10px}.repeat-row{display:grid;grid-template-columns:minmax(0,1fr) 100px 42px;gap:8px;align-items:end}.repeat-row.activity{grid-template-columns:minmax(0,1fr) 42px}.remove{border:1px solid #d5a7a7;background:#fff5f5;color:#a32020;border-radius:8px;min-height:42px;cursor:pointer;font-size:1.1rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button{font:inherit;font-weight:700;border:0;border-radius:9px;padding:11px 15px;cursor:pointer}.primary{background:var(--blue);color:white}.secondary{background:#e7edf5;color:#233b59}.ghost{background:white;color:var(--navy);border:1px solid var(--line)}button:hover{filter:brightness(.97)}
+.preview{width:100%;min-height:250px;white-space:pre-wrap;background:#f8fafc}.status{font-size:.88rem;color:var(--muted);min-height:1.2em;margin-top:8px}.footer{font-size:.82rem;color:var(--muted);text-align:center;padding:8px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.repeat-row{grid-template-columns:minmax(0,1fr) 78px 38px;gap:6px}.repeat-row.activity{grid-template-columns:minmax(0,1fr) 38px}.card{padding:14px}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Reportes diarios · Lote 03</h1><p>Generador de reportes por tramo, listo para copiar a WhatsApp.</p></div></header>
+<main>
+<form id="reportForm">
+<section class="card">
+<h2>1. Identificación del reporte</h2>
+<div class="grid">
+<div class="field"><label for="fecha">Fecha</label><input id="fecha" type="date" required></div>
+<div class="field"><label for="tramo">Número de tramo</label><select id="tramo" required><option value="">Selecciona un tramo</option></select></div>
+<div class="field full"><label for="direccion">Dirección</label><input id="direccion" class="readonly" readonly placeholder="Se completa al seleccionar el tramo"></div>
+<div class="field"><label for="comuna">Comuna / corregimiento</label><input id="comuna" class="readonly" readonly placeholder="Se completa automáticamente"></div>
+</div>
+<p class="hint">La dirección y la comuna provienen del archivo de direcciones del Lote 03 integrado en esta página.</p>
+</section>
+<section class="card" style="margin-top:16px">
+<h2>2. Actividades ejecutadas</h2>
+<div id="activities" class="repeat-list"></div>
+<div class="actions"><button type="button" class="secondary" id="addActivity">+ Agregar actividad</button></div>
+</section>
+<section class="card" style="margin-top:16px">
+<h2>3. Personal</h2>
+<div id="personnel" class="repeat-list"></div>
+<div class="actions"><button type="button" class="secondary" id="addPerson">+ Agregar cargo</button></div>
+</section>
+<section class="card" style="margin-top:16px">
+<h2>4. Equipo y maquinaria</h2>
+<div id="equipment" class="repeat-list"></div>
+<div class="actions"><button type="button" class="secondary" id="addEquipment">+ Agregar equipo</button></div>
+</section>
+<section class="card" style="margin-top:16px">
+<h2>5. Condiciones climáticas</h2>
+<div class="field"><label for="clima">Clima</label><select id="clima" required><option value="">Selecciona una condición</option><option>Seco</option><option>Lluvioso</option><option>Nublado</option><option>Parcialmente nublado</option><option>Lluvia intermitente</option><option>Otro</option></select></div>
+<div class="field" id="otroClimaWrap" style="display:none;margin-top:12px"><label for="otroClima">Especificar clima</label><input id="otroClima" placeholder="Describe las condiciones"></div>
+</section>
+<section class="card" style="margin-top:16px">
+<h2>6. Reporte generado</h2>
+<label for="preview">Revisa el mensaje antes de copiarlo</label>
+<textarea id="preview" class="preview" readonly placeholder="Completa los campos y pulsa “Generar reporte”."></textarea>
+<div class="actions">
+<button type="button" class="primary" id="generate">Generar reporte</button>
+<button type="button" class="secondary" id="copy">Copiar para WhatsApp</button>
+<button type="button" class="ghost" id="newReport">Nuevo reporte</button>
+</div>
+<div id="status" class="status" role="status"></div>
+</section>
+</form>
+<p class="footer">Proyecto independiente · Reportes diarios del Lote 03</p>
+</main>
+<script>
+const TRAMOS = [{"tramo":1,"comuna":"2","direccion":"CARRERA 2B OESTE ENTRE CARRERA 1 Y CALLE 14 OESTE"},{"tramo":2,"comuna":"2","direccion":"CALLE 45N ENTRE AVENIDA 6AN Y AVENIDA 6DN"},{"tramo":3,"comuna":"2","direccion":"CALLE 52 NORTE ENTRE AVENIDA 4 NORTE Y AVENIDA 6 NORTE CALZADA SUR"},{"tramo":4,"comuna":"2","direccion":"CALLE 23 AN ENTRE AVENIDA 5A NORTE Y AVENIDA 3 NORTE"},{"tramo":5,"comuna":"2","direccion":"CALLE 23 BN ENTRE AVENIDA 3N Y AVENIDA 4N"},{"tramo":6,"comuna":"2","direccion":"CALLE 21N ENTRE AVENIDA 9N Y AVENIDA 10N"},{"tramo":7,"comuna":"2","direccion":"CALLE 22N ENTRE AVENIDA 9N Y CALLE 21N"},{"tramo":8,"comuna":"2","direccion":"AVENIDA 6BISN ENTRE CALLE 26N Y CALLE 29N"},{"tramo":9,"comuna":"2","direccion":"AVENIDA 4 BN ENTRE CALLE 47N Y CALLE 48N"},{"tramo":10,"comuna":"2","direccion":"CALLE 26N ENTRE AVENIDA 6AN Y 6BN"},{"tramo":11,"comuna":"2","direccion":"CALLE 28N ENTRE AVENIDA 6AN Y AVENIDA 7N"},{"tramo":12,"comuna":"5","direccion":"CARRERA 2A ENTRE CALLE 57 Y CALLE 59"},{"tramo":13,"comuna":"7","direccion":"CARRERA 13 ENTRE CALLE 74 A y 75"},{"tramo":14,"comuna":"7","direccion":"CARRERA 9A ENTRE CALLE 73 y 74"},{"tramo":15,"comuna":"7","direccion":"CARRERA 7J ENTRE CALLE 65 Y CALLE 68 - LAS CEIBAS"},{"tramo":16,"comuna":"7","direccion":"CARRERA 7J ENTRE CALLE 69 Y CALLE 69A"},{"tramo":17,"comuna":"7","direccion":"CARRERA 18 ENTRE CALLE 71A Y CALLE 72A"},{"tramo":18,"comuna":"8","direccion":"CALLE 33F ENTRE CARRERA 18 Y CARRERA 23"},{"tramo":19,"comuna":"8","direccion":"CARRERA 17 ENTRE CALLE 33F Y CALLE 34"},{"tramo":20,"comuna":"8","direccion":"CALLE 32 ENTRE CARRERA 17 Y CARRERA 17C"},{"tramo":21,"comuna":"8","direccion":"CALLE 30 ENTRE CARRERA 11G Y CARRERA 15"},{"tramo":22,"comuna":"8","direccion":"CARRERA 17C ENTRE CALLE 43 Y CALLE 44"},{"tramo":23,"comuna":"8","direccion":"CALLE 51 ENTRE CARRERA 10 Y CARRERA 11"},{"tramo":24,"comuna":"8","direccion":"CARRERA 17C ENTRE CALLE 33 B Y CALLE 33E"},{"tramo":25,"comuna":"8","direccion":"CALLE 28 ENTRE CARRERA 10 Y CARRERA 11A"},{"tramo":26,"comuna":"8","direccion":"CARRERA 11 ENTRE CALLE 52 Y CALLE 54"},{"tramo":27,"comuna":"8","direccion":"CARRERA 12C ENTRE CALLE 40 Y CALLE 44"},{"tramo":28,"comuna":"8","direccion":"CALLE 39 ENTRE CARRERA 12 Y CARRERA 15"},{"tramo":29,"comuna":"8","direccion":"CARRERA 16 ENTRE CALLE 39 Y CALLE 40"},{"tramo":30,"comuna":"10","direccion":"CALLE 23 ENTRE CARRERA 32 Y CALLE 32 A"},{"tramo":31,"comuna":"10","direccion":"CARRERA 32 A ENTRE CALLE 19 Y CALLE 23"},{"tramo":32,"comuna":"10","direccion":"CARRERA 32 ENTRE CALLE 19 Y CALLE 23"},{"tramo":33,"comuna":"10","direccion":"CARRERA 34 ENTRE CALLE 14 Y CALLE 14C"},{"tramo":34,"comuna":"10","direccion":"CALLE 12A ENTRE CARRERA 35 Y CARRERA 36"},{"tramo":35,"comuna":"10","direccion":"CARRERA 35 ENTRE CALLE 12A Y CALLE 12C"},{"tramo":36,"comuna":"10","direccion":"CARRERA 49B ENTRE CALLE 12 Y CALLE 13"},{"tramo":37,"comuna":"10","direccion":"CALLE 13C ENTRE CARRERA 44A Y CARRERA 49"},{"tramo":38,"comuna":"11","direccion":"CARRERA 33A ENTRE CALLE 34B Y CALLE 35"},{"tramo":39,"comuna":"11","direccion":"CARRERA 23C ENTRE CALLE 29 y CALLE 30"},{"tramo":40,"comuna":"11","direccion":"CALLE 29 ENTRE CARRERA 23B Y CARRERA 23C"},{"tramo":41,"comuna":"11","direccion":"CARRERA 31 ENTRE CALLE 33 Y CALLE 34B"},{"tramo":42,"comuna":"11","direccion":"CALLE 35G ENTRE CARRERA 34 Y CARRERA 35"},{"tramo":43,"comuna":"11","direccion":"CALLE 26 ENTRE CARRERA 37 Y CARRERA 39"},{"tramo":44,"comuna":"11","direccion":"CALLE 26A ENTRE CARRERA 25A Y CARRERA 25B"},{"tramo":45,"comuna":"11","direccion":"CALLE 26A ENTRE CARRERA 25B Y CARRERA 28"},{"tramo":46,"comuna":"FELIDIA","direccion":"LA CABAÑA SECTOR LA LOMITA - CORREGIMIENTO DE FELIDIA - PP"},{"tramo":47,"comuna":"FELIDIA","direccion":"VEREDA SANTA ELENA - CORREGIMIENTO DE FELIDIA - PP"},{"tramo":48,"comuna":"FELIDIA","direccion":"VEREDA LA ESPERANZA SECTOR LOS PINOS - CORREGIMIENTO DE FELIDIA"},{"tramo":49,"comuna":"FELIDIA","direccion":"VEREDA NIEVES ALTAS SECTOR LOS MARTÍNEZ DESDE CASABLANCA HASTA LOMBARDÍA - CORREGIMIENTO DE FELIDIA"},{"tramo":50,"comuna":"FELIDIA","direccion":"VEREDA EL DIAMANTE SECTOR LA SOLEDAD CASA EL RINCÓN DE LA ABUELA - CORREGIMIENTO DE FELIDIA"},{"tramo":51,"comuna":"FELIDIA","direccion":"VEREDA EL DIAMANTE SECTOR EL CEDRAL INICIA EN CRUCERO Y FIN EN EN FINCA DE BERNARDO CAICEDO - CORREGIMIENTO DE FELIDIA"},{"tramo":52,"comuna":"PANCE","direccion":"VIA AL PATO HACIA PUEBLO PANCE - CORREGIMIENTO DE PANCE"},{"tramo":53,"comuna":"PANCE","direccion":"VEREDA VORAGINE SECTOR ARCA DE NOE (PIEDRA BONITA) - CORREGIMIENTO DE PANCE"},{"tramo":54,"comuna":"PANCE","direccion":"VEREDA VORAGINE -SECTOR ARCA DE NOE (LIBELULA) - CORREGIMIENTO DE PANCE"}];
+const $ = id => document.getElementById(id);
+const fmtDate = value => { if(!value) return ""; const [y,m,d]=value.split("-"); return `${d}-${m}-${y}`; };
+function addRow(containerId, type, a="", qty="1"){
+ const container=$(containerId), row=document.createElement("div");
+ row.className="repeat-row"+(type==="activity"?" activity":"");
+ if(type==="activity"){
+  row.innerHTML=`<div class="field"><label>Actividad ${container.children.length+1}</label><textarea class="entry" placeholder="Describe la actividad ejecutada"></textarea></div><button type="button" class="remove" aria-label="Eliminar actividad">×</button>`;
+  row.querySelector("textarea").value=a;
+ }else{
+  const label=type==="person"?"Cargo / función":"Equipo / maquinaria";
+  const placeholder=type==="person"?"Ej. inspector":"Ej. retroexcavadora";
+  row.innerHTML=`<div class="field"><label>${label}</label><input class="entry" placeholder="${placeholder}"></div><div class="field"><label>Cantidad</label><input class="qty" type="number" min="1" step="1" value="${qty}"></div><button type="button" class="remove" aria-label="Eliminar fila">×</button>`;
+  row.querySelector(".entry").value=a;
+ }
+ row.querySelector(".remove").addEventListener("click",()=>{row.remove();renumberActivities();});
+ container.appendChild(row); renumberActivities();
+}
+function renumberActivities(){[...$("activities").children].forEach((row,i)=>row.querySelector("label").textContent=`Actividad 1.${i+1}`)}
+function fillTramos(){
+ TRAMOS.forEach(t=>{const o=document.createElement("option");o.value=t.tramo;o.textContent=`Tramo ${t.tramo}`;$("tramo").appendChild(o)});
+}
+function selectedTramo(){return TRAMOS.find(t=>String(t.tramo)===$("tramo").value)}
+$("tramo").addEventListener("change",()=>{const t=selectedTramo();$("direccion").value=t?.direccion||"";$("comuna").value=t?.comuna||"";});
+$("clima").addEventListener("change",()=>{$("otroClimaWrap").style.display=$("clima").value==="Otro"?"block":"none";});
+$("addActivity").addEventListener("click",()=>addRow("activities","activity"));
+$("addPerson").addEventListener("click",()=>addRow("personnel","person"));
+$("addEquipment").addEventListener("click",()=>addRow("equipment","equipment"));
+function collect(containerId, isActivity=false){
+ return [...$(containerId).querySelectorAll(".repeat-row")].map(row=>{
+  const name=row.querySelector(".entry").value.trim();
+  if(!name)return "";
+  if(isActivity)return name;
+  const qty=parseInt(row.querySelector(".qty").value,10);
+  return `${Number.isFinite(qty)&&qty>0?qty:1} ${name}`;
+ }).filter(Boolean);
+}
+function buildReport(){
+ const t=selectedTramo();
+ if(!$("fecha").value){alert("Selecciona la fecha del reporte.");$("fecha").focus();return ""}
+ if(!t){alert("Selecciona un tramo válido.");$("tramo").focus();return ""}
+ const acts=collect("activities",true), people=collect("personnel"), equip=collect("equipment");
+ if(!acts.length){alert("Registra al menos una actividad.");return ""}
+ if(!people.length){alert("Registra al menos un cargo de personal.");return ""}
+ if(!equip.length){alert("Registra al menos un equipo o maquinaria.");return ""}
+ let clima=$("clima").value;
+ if(!clima){alert("Selecciona las condiciones climáticas.");return ""}
+ if(clima==="Otro"){clima=$("otroClima").value.trim();if(!clima){alert("Especifica las condiciones climáticas.");return ""}}
+ return `Reporte Diario Lote 03, ${fmtDate($("fecha").value)}\nTramo ${t.tramo}, ${t.direccion}\nComuna ${t.comuna}\n\n1. Actividades:\n${acts.map((a,i)=>`1.${i+1} ${a}`).join("\n")}\n\n2. Personal: ${people.join(", ")}\n\n3. Equipo: ${equip.join(", ")}\n\n4. Clima: ${clima}`;
+}
+$("generate").addEventListener("click",()=>{const report=buildReport();if(report){$("preview").value=report;$("status").textContent="Reporte generado. Revísalo antes de copiar."; }});
+$("copy").addEventListener("click",async()=>{
+ let text=$("preview").value;
+ if(!text){text=buildReport();if(!text)return;$("preview").value=text}
+ try{await navigator.clipboard.writeText(text);$("status").textContent="Reporte copiado. Ya puedes pegarlo en WhatsApp."}
+ catch(e){$("preview").focus();$("preview").select();const ok=document.execCommand("copy");$("status").textContent=ok?"Reporte copiado. Ya puedes pegarlo en WhatsApp.":"No se pudo copiar automáticamente. Selecciona el texto y cópialo manualmente."}
+});
+$("newReport").addEventListener("click",()=>{
+ if(!confirm("¿Iniciar un reporte nuevo? Se borrarán las actividades, el personal, los equipos y el reporte generado."))return;
+ $("tramo").value="";$("direccion").value="";$("comuna").value="";$("activities").innerHTML="";$("personnel").innerHTML="";$("equipment").innerHTML="";
+ $("clima").value="";$("otroClima").value="";$("otroClimaWrap").style.display="none";$("preview").value="";$("status").textContent="";
+ addRow("activities","activity");addRow("personnel","person");addRow("equipment","equipment");
+});
+fillTramos();
+const now=new Date();$("fecha").value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+addRow("activities","activity");addRow("personnel","person");addRow("equipment","equipment");
+</script>
+</body>
+</html>
